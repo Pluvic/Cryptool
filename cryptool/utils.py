@@ -60,7 +60,7 @@ def inverse(x: int, n: int) -> int:
     _, be1, _ = bezout(x, n)
     return be1 % n
 
-def primalityList(numList: list[int]) -> bool:
+def _primalityList(numList: list[int]) -> bool:
     """Check if all numbers in the list are pairwise coprime.
     
     Args:
@@ -69,7 +69,7 @@ def primalityList(numList: list[int]) -> bool:
     Returns:
         bool: True if all numbers are pairwise coprime, False otherwise.
     """
-    
+
     for i in range(len(numList)):
         for j in range(i+1,len(numList)):
             if gcd(numList[i], numList[j]) != 1:
@@ -92,7 +92,7 @@ def chineseRemainder(listRemainders: list[int], listModulos: list[int]) -> int:
         print("The 2 lists need to have the same size.")
         return
     
-    if not primalityList(listModulos):
+    if not _primalityList(listModulos):
         print("The modulos need to be pairwise coprime.")
         return
     

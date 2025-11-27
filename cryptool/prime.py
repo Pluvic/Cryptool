@@ -2,7 +2,7 @@
 
 import random
 
-def temoinMillerRabin(a: int, p: int) -> bool:
+def _temoinMillerRabin(a: int, p: int) -> bool:
     """Perform the Miller-Rabin primality test.
     
     Args:
@@ -50,7 +50,7 @@ def millerRabin(p: int, n: int) -> bool:
 
     for _ in range(n):
         a = random.randint(2, p - 2)
-        if not temoinMillerRabin(a, p):
+        if not _temoinMillerRabin(a, p):
             return False
     return True
 
@@ -98,7 +98,7 @@ def genPrime(n: int) -> int:
     Returns:
         int: A random prime number with n bits.
     """
-    
+
     x = random.randint(1<<(n-1), (1<<(n)))
     if x % 2 == 0:
         x += 1
