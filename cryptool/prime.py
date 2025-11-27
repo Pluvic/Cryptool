@@ -12,6 +12,7 @@ def temoinMillerRabin(a: int, p: int) -> bool:
     Returns:
         bool: True if p is probably prime, False if p is composite.
     """
+
     q = p - 1
     k = 0
 
@@ -62,6 +63,7 @@ def gatherPrimes(filePath: str) -> list[int]:
     Returns:
         list[int]: A list of prime numbers read from the file.
     """
+
     primes = []
     with open(filePath, 'r') as file:
         for line in file:
@@ -96,6 +98,7 @@ def genPrime(n: int) -> int:
     Returns:
         int: A random prime number with n bits.
     """
+    
     x = random.randint(1<<(n-1), (1<<(n)))
     if x % 2 == 0:
         x += 1
