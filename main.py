@@ -5,6 +5,7 @@
 from cryptool.utils import gcd, bezout, inverse
 from cryptool.prime import genPrime
 from cryptool.RSA.factorisation import pollardRho
+from cryptool.group import ZpMult
 
 if __name__ == "__main__":
     print(gcd(10,2))
@@ -17,10 +18,12 @@ if __name__ == "__main__":
     print(f"Generated prime p: {p}")
     print(f"Generated prime q: {q}")
 
-    N = p * q
+    # Test group operations
+    group = ZpMult(809)
 
-    factors = pollardRho(N)
-    if factors:
-        print(f"Factors of N: {factors[0]} and {factors[1]}")
-    else:
-        print("Failed to factor N.")
+    g = 3
+    h = 525
+
+    print(f"Calculating discrete logarithm of {h} base {g} in ZpMult(809):")
+    x = group.calculDL(g, h)
+    print(f"Discrete logarithm result: x = {x}")
