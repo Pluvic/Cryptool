@@ -107,3 +107,129 @@ def chineseRemainder(listRemainders: list[int], listModulos: list[int]) -> int:
         x += i * ni * bi
     
     return x % N
+
+def isQuadraticResidue(a: int, p: int) -> bool:
+    """Check if a is a quadratic residue modulo p using Euler's criterion.
+    
+    Args:
+        a (int): The integer to check.
+        p (int): The prime modulus.
+
+    Returns:
+        bool: True if a is a quadratic residue modulo p, False otherwise.
+    """
+
+    return pow(a, (p - 1) // 2, p) == 1
+
+def legendreSymbol(a: int, p: int) -> int:
+    """Compute the Legendre symbol (a/p).
+    
+    Args:
+        a (int): The integer to compute the Legendre symbol for.
+        p (int): The prime modulus.
+
+    Returns:
+        int: 1 if a is a quadratic residue modulo p, -1 if not, and 0 if a is divisible by p.
+    """
+
+    ls = pow(a, (p - 1) // 2, p)
+    if ls == p - 1:
+        return -1
+    return ls
+
+def squareRootModP(a: int, p: int) -> int:
+    """Compute a square root of a modulo p using the Tonelli-Shanks algorithm.
+    
+    Args:
+        a (int): The integer to compute the square root for.
+        p (int): The prime modulus.
+
+    Returns:
+        int: A square root of a modulo p if it exists, otherwise raises an error.
+    """
+
+    if not isQuadraticResidue(a, p):
+        print(f"Error: {a} is not a quadratic residue modulo {p}.")
+        return
+
+    if p % 4 == 3:
+        r = pow(a, (p + 1) // 4, p)
+        return r
+    
+    if p % 4 == 1:
+        return TonelliShanks(a, p)
+    
+def TonelliShanks(x: int, p: int) -> int:
+    """Tonelli-Shanks algorithm to find a square root of x modulo p.
+    
+    Args:
+        x (int): The integer to compute the square root for.
+        p (int): The prime modulus.
+
+    Returns:
+        int: A square root of x modulo p.
+    """
+
+    # Step 1: Write p - 1 as 2^k * q with q odd
+    k = 0
+    phiP = p - 1
+    while phiP % 2 == 0:
+        phiP //= 2
+        k += 1
+    q = phiP
+
+    # Step 2: Find a quadratic non-residue z
+    z = 2
+    while isQuadraticResidue(z, p):
+        z += 1
+
+    # Step 3: Initializations
+    c = pow(z, q, p)
+    t = pow(x, q, p)
+    r = pow(x, (q + 1) // 2, p)
+
+    # Step 4: Main loop
+    while t != 0 and t != 1:
+        i = 0
+        for i in range(1, k):
+            if pow(t, 2**i, p) == 1:
+                break
+
+        b = pow(c, 2**(k - i - 1), p)
+        k = i
+        c = (b * b) % p
+        t = (t * c) % p
+        r = (r * b) % p
+
+    if t == 0:
+        return 0
+    return r
+
+def quadraticEquationModP(A: int, B: int, C: int, p: int) -> tuple[int, int] | None:
+    """Solve the quadratic equation Ax^2 + Bx + C ≡ 0 (mod p).
+    
+    Args:
+        A (int): Coefficient of x^2.
+        B (int): Coefficient of x.
+        C (int): Constant term.
+        p (int): The prime modulus.
+    Returns:
+        tuple[int, int] | None: A tuple containing the two solutions if they exist, otherwise None.
+    """
+    
+    if A % p == 0:
+        raise ValueError("A must be non-zero modulo p")
+
+    x = (B * B - 4 * A * C) % p
+
+    if not isQuadraticResidue(x, p):
+        return None
+
+    sqrt_x = squareRootModP(x, p)
+    inv_2A = inverse(2 * A, p)
+
+    root1 = (-B + sqrt_x) * inv_2A % p
+    root2 = (-B - sqrt_x) * inv_2A % p
+
+    return root1, root2
+        
