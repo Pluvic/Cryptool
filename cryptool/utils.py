@@ -232,4 +232,28 @@ def quadraticEquationModP(A: int, B: int, C: int, p: int) -> tuple[int, int] | N
     root2 = (-B - sqrt_x) * inv_2A % p
 
     return root1, root2
+
+def integerCubeRoot(n: int) -> int:
+    """Compute the integer cube root of n using binary search.
+    
+    Args:
+        n (int): The integer to compute the cube root for.
+        
+    Returns:
+        int: The integer cube root of n.
+    """
+
+    low = 0
+    high = n
+
+    while low < high:
+        mid = (low + high) // 2
+        mid_cubed = mid * mid * mid
+
+        if mid_cubed < n:
+            low = mid + 1
+        else:
+            high = mid
+
+    return low if low * low * low == n else low - 1
         
