@@ -80,7 +80,8 @@ def isPrime(p: int) -> bool:
         bool: True if p is probably prime, False if p is composite.
     """
 
-    primeList = gatherPrimes("primes_100000.txt")
+    # Prime list is in ../public/primes_100000.txt
+    primeList = gatherPrimes("./public/primes_100000.txt")
     for prime in primeList:
         if prime == p:
             return True

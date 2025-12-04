@@ -3,7 +3,7 @@
 #-------------------------------------------#
 
 from cryptool.utils import gcd, bezout, inverse
-from cryptool.prime import genPrime
+from cryptool.prime import genPrime, isPrime
 from cryptool.RSA.factorisation import pollardRho
 from cryptool.group import ZpMult
 
@@ -17,6 +17,9 @@ if __name__ == "__main__":
     q = genPrime(60)
     print(f"Generated prime p: {p}")
     print(f"Generated prime q: {q}")
+
+    print(f"Is p prime? {isPrime(p)}")
+    print(f"Is q prime? {isPrime(q)}")
 
     # Test group operations
     group = ZpMult(809)
