@@ -146,3 +146,62 @@ def factorizeNwithD(N: int, d: int, e: int) -> tuple[int, int] | None:
                 break
 
     return None
+
+def reducesRationals(A: int, B: int) -> tuple[list[int], list[int]]:
+    """Compute the continued fraction expansion of A/B.
+
+    Args:
+        A (int): The numerator.
+        B (int): The denominator.
+
+    Returns:
+        tuple[list[int], list[int]]: Two lists containing the numerators and denominators of the convergents.
+    """
+
+    ui = [1]
+    vi = [0, 1]
+    ai = [1]
+    a1 = A // B
+    ai.append(a1)
+    ui.append(a1)
+    A, B = B, A % B
+
+    while B != 0:
+        q = A // B
+        ai.append(q)
+        r = A % B
+        A, B = B, r
+        ui.append(ui[-1]*ai[-1] + ui[-2])
+        vi.append(vi[-1]*ai[-1] + vi[-2])
+
+    ui.pop(0)
+    vi.pop(0)
+    return ui, vi
+
+def wienerAttack(N: int, e: int) -> tuple[int, int] | None:
+    """Perform Wiener's attack to factor N given a small private exponent d.
+
+    Args:
+        N (int): The RSA modulus.
+        e (int): The public exponent.
+
+    Returns:
+        tuple[int, int] | None: A tuple containing the two factors of N if found, otherwise None.
+    """
+
+    ki, di = reducesRationals(N, e)
+
+    for i in range(len(ki)):
+        if di[i] == 0:
+            continue
+
+        phiN = (e * ki[i] - 1) // di[i]
+        
+        if phiN > N:
+            continue
+        p, q = factorizNwithPhi(N, phiN)
+        
+        if p * q == N:
+            return p, q
+
+    return None
