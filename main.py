@@ -4,7 +4,7 @@
 
 from cryptool.utils import gcd, bezout, inverse
 from cryptool.prime import genPrime, isPrime
-from cryptool.RSA.factorisation import factorizNwithPhi, factorizeNwithD
+from cryptool.AES.rijndael import sbox
 from cryptool.RSA.attack import commonModulus, commonExponent
 from cryptool.group import ZpMult
 from Cryptodome.Util.number import long_to_bytes, bytes_to_long
@@ -47,3 +47,10 @@ if __name__ == "__main__":
     print(f"Calculating discrete logarithm of {h} base {g} in ZpMult(809):")
     x = group.calculDL(g, h)
     print(f"Discrete logarithm result: x = {x}")
+
+    print("\nGenerating AES S-Box:")
+    sbox_values = sbox()
+    
+    for i in range(16):
+        row = sbox_values[i*16:(i+1)*16]
+        print(" ".join(f"{val:02x}" for val in row))

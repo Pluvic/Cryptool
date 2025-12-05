@@ -1,5 +1,8 @@
 # This file contains utility functions for the Cryptool project.
 
+from math import log
+
+
 def gcd(a: int, b: int) -> int:
     """Calculate the greatest common divisor of a and b using the Euclidean algorithm. 
 
@@ -256,4 +259,24 @@ def integerCubeRoot(n: int) -> int:
             high = mid
 
     return low if low * low * low == n else low - 1
+
+
+def int2poly(x):
+    """Convert an integer to its polynomial representation in GF(2^n).
+    args:
+        x (int): The integer to convert.
+    Returns:
+        str: The polynomial representation of the integer.
+    """
+    s = ""
+    if x & 1: s += "1" 
+    if x >> 1 & 1:
+       if s != "" : s += "+\u03B1"
+       else : s += "\u03B1"
+    k = int(log(x, 2)) + 1
+    for i in range(2, k + 1):
+         if x >> i & 1 : 
+             if s != "" : s += "+\u03B1^%s"%i
+             else :  s += "\u03B1^%s"%i
+    return s
         
