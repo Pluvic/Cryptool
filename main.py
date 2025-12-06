@@ -2,55 +2,26 @@
 #  This file is for demonstration purposes. #
 #-------------------------------------------#
 
-from cryptool.utils import gcd, bezout, inverse
-from cryptool.prime import genPrime, isPrime
-from cryptool.AES.rijndael import sbox
-from cryptool.RSA.attack import commonModulus, commonExponent
-from cryptool.group import ZpMult
-from Cryptodome.Util.number import long_to_bytes, bytes_to_long
+from sympy import factorint
+from cryptool.group import Group, ZpMulWithOrder
 
 
 if __name__ == "__main__":
-    print(gcd(10,2))
-    print(bezout(14, -21))
-    print(inverse(3, 1<<1024))
-
-    """Generate a random prime number with n bits."""
-    p = genPrime(100)
-    q = genPrime(100)
-    print(f"Generated prime p: {p}")
-    print(f"Generated prime q: {q}")
-
-    print(f"Is p prime? {isPrime(p)}")
-    print(f"Is q prime? {isPrime(q)}")
-
-    N = p * q
-    phi = (p - 1) * (q - 1)
-    e1 = 31
-    e2 = 17
-
-    message = b"Hello, Cryptool!"
-    m = bytes_to_long(message)
-    c1 = pow(m, e1, N)
-    c2 = pow(m, e2, N)
-
-    decrypted_m1 = commonModulus(N, e1, e2, c1, c2)
-    decrypted_message1 = long_to_bytes(decrypted_m1)
-    print(f"Decrypted message using common modulus attack: {decrypted_message1}") 
-
-    # Test group operations
-    group = ZpMult(809)
-
+    myGroup = ZpMulWithOrder(257, 256)
     g = 3
-    h = 525
+    h = 131
+    x = myGroup.DLnaive(g, h)
+    print(f"Discrete logarithm of {h} to the base {g} in Z/257Z*: {x}")
 
-    print(f"Calculating discrete logarithm of {h} base {g} in ZpMult(809):")
-    x = group.calculDL(g, h)
-    print(f"Discrete logarithm result: x = {x}")
+    q = 2
+    e = 8
+    x_pp = myGroup.DLinGroupofPrimePowerOrder(g, h, q, e)
+    print(f"Discrete logarithm of {h} to the base {g} in subgroup of order {q}^{e}: {x_pp}")
 
-    print("\nGenerating AES S-Box:")
-    sbox_values = sbox()
-    
-    for i in range(16):
-        row = sbox_values[i*16:(i+1)*16]
-        print(" ".join(f"{val:02x}" for val in row))
+    p = 7863166752583943287208453249445887802885958578827520225154826621191353388988908983484279021978114049838254701703424499688950361788140197906625796305008451719
+    y = 6289736695712027841545587266292164172813699099085672937550442102159309081155467550411414088175729823598108452032137447608687929628597035278365152781494883808
+    g = 2862392356922936880157505726961027620297475166595443090826668842052108260396755078180089295033677131286733784955854335672518017968622162153227778875458650593
+
+    group = ZpMulWithOrder(p, p-1)
+    i = group.pohligHellman(g, y)
+    print(f"Discrete logarithm of y to the base g in Z/pZ*: {i}")

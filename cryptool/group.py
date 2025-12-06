@@ -2,6 +2,8 @@
 
 from abc import ABC, abstractmethod
 from math import log, ceil, sqrt
+from sympy.ntheory import factorint
+from cryptool.utils import chineseRemainder
 
 class Group(ABC):
     """Abstract base class for mathematical groups.
@@ -38,7 +40,7 @@ class Group(ABC):
         """Naive discrete logarithm function."""
         x, k = self.e, 0
         while(x != h):
-            x = self.loi(x, g)
+            x = self.loi(x, g) % self.p
             k += 1
         return k
     
@@ -89,7 +91,41 @@ class ZpMult(Group):
         return (g1 * g2) % self.p
     
     def inv(self, g: int) -> int:
-        for i in range(1, self.p):
-            if (g * i) % self.p == 1:
-                return i
-        return None
+        return pow(g, -1, self.p)
+    
+class ZpMulWithOrder(ZpMult):
+    """Group of integers modulo p under multiplication with specified order."""
+    def __init__(self, p: int, N: int):
+        super().__init__(p)
+        self.N = N
+    
+    def DLinGroupofPrimePowerOrder(self, g: int, h: int, q: int, n: int) -> int:
+        """Discrete logarithm in a group of prime power order."""
+        i = 0
+        y = pow(g, pow(q, n-1, self.N), self.p)
+        
+        for j in range(n):
+            e_j = pow(q, n - j - 1, self.N)
+            h_j = pow(h * self.inv(pow(g, i, self.p)), e_j, self.p)
+            d_j = self.calculDL(y, h_j)
+            i += d_j * pow(q, j, self.N)
+        return i
+    
+    def pohligHellman(self, g: int, h: int) -> int:
+        """Pohlig-Hellman algorithm for discrete logarithm."""
+        factors = factorint(self.N)
+        ijs = []
+
+        for p, e in factors.items():
+            print(f"Processing prime factor {p}^{e}")
+            g_j = pow(g, (self.N // pow(p, e)), self.p)
+            h_j = pow(h, (self.N // pow(p, e)), self.p)
+
+            group = ZpMulWithOrder(self.p, pow(p, e))
+            i_j = group.DLinGroupofPrimePowerOrder(g_j, h_j, p, e)
+            ijs.append(i_j)
+
+        modulos = [pow(p, e) for p, e in factors.items()]
+        x = chineseRemainder(ijs, modulos)
+        return x % self.N
+        
