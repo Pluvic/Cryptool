@@ -98,6 +98,25 @@ class ZpMulWithOrder(ZpMult):
     def __init__(self, p: int, N: int):
         super().__init__(p)
         self.N = N
+
+    def ShanksAlgorithm(self, g: int, h: int) -> int:
+        """Shanks' algorithm for discrete logarithm."""
+        m = ceil(sqrt(self.N))
+        table = {}
+
+        for j in range(m):
+            value = self.exp(g, j)
+            table[value] = j
+
+        g_inv_m = self.exp(g, self.N - m)
+
+        current = h
+        for i in range(m):
+            if current in table:
+                return i * m + table[current]
+            current = self.loi(current, g_inv_m)
+        
+        return None
     
     def DLinGroupofPrimePowerOrder(self, g: int, h: int, q: int, n: int) -> int:
         """Discrete logarithm in a group of prime power order."""
@@ -107,7 +126,7 @@ class ZpMulWithOrder(ZpMult):
         for j in range(n):
             e_j = pow(q, n - j - 1, self.N)
             h_j = pow(h * self.inv(pow(g, i, self.p)), e_j, self.p)
-            d_j = self.calculDL(y, h_j)
+            d_j = self.ShanksAlgorithm(y, h_j)
             i += d_j * pow(q, j, self.N)
         return i
     
