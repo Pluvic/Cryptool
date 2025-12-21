@@ -126,7 +126,10 @@ class ZpMulWithOrder(ZpMult):
         for j in range(n):
             e_j = pow(q, n - j - 1, self.N)
             h_j = pow(h * self.inv(pow(g, i, self.p)), e_j, self.p)
-            d_j = self.ShanksAlgorithm(y, h_j)
+            
+            subgroup = ZpMulWithOrder(self.p, q)
+            d_j = subgroup.ShanksAlgorithm(y, h_j)
+
             i += d_j * pow(q, j, self.N)
         return i
     
