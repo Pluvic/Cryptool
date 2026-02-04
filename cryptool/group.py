@@ -1,6 +1,7 @@
 # This file contains functions related to group theory for the Cryptool project.
 
 from abc import ABC, abstractmethod
+from random import randint
 from math import log, ceil, sqrt
 from sympy.ntheory import factorint
 from cryptool.utils import chineseRemainder
@@ -154,4 +155,110 @@ class ZpMulWithOrder(ZpMult):
         modulos = [pow(p, e) for p, e in factors.items()]
         x = chineseRemainder(ijs, modulos)
         return x % self.N
+
+class ECConZp(Group):
+    """Elliptic Curve over Zp.
+        Args:
+            A (int): Coefficient A of the elliptic curve.
+            B (int): Coefficient B of the elliptic curve.
+            p (int): A prime number defining the field Zp.
+            N (int): Order of the elliptic curve.
+            e (list): Identity element of the elliptic curve.
+            G (list): Base point G on the elliptic curve.
+    """
+    def __init__(self, A: int, B: int, G: list, p: int, N: int, e: list):
+        super().__init__(p, N, e)
+        self.A = A
+        self.B = B
+        self.G = G
+
+    def exp(self, P: list, k: int) -> list:
+        """Perform fast exponentiation on the elliptic curve."""
+        if k == -1:
+            return self.exp(P, (self.N)-1)
+
+        if k == 0:
+            return self.e
         
+        R = self.e
+        t = int(log(k, 2)) + 1
+        for i in range(t, -1, -1):
+            R = self.loi(R, R)
+            if ((k >> i) & 1) == 1:
+                R = self.loi(R, P)
+        return R
+
+    def loi(self, P: list, Q: list) -> list:
+        """Define the group operation (point addition) on the elliptic curve."""
+        if P == self.e:
+            return Q
+        elif Q == self.e:
+            return P
+        
+        if P[0] == Q[0]:
+
+            if P[1] == (-Q[1] % self.p):
+                return self.e
+            else: # 2 * P
+                x, y = P[0], P[1]
+                Lambda = ((3 * x**2 + self.A) * pow(2*y, -1, self.p)) % self.p
+                x3 = (Lambda**2 - 2*x) % self.p
+                y3 = (Lambda*(x - x3) - y) % self.p
+        
+        else:
+            x1, y1, x2, y2 = P[0], P[1], Q[0], Q[1]
+            Lambda = ((y2 - y1) * pow((x2 - x1), -1, self.p)) % self.p
+            x3 = (Lambda**2 - x1 - x2) % self.p
+            y3 = (Lambda*(x1 - x3) - y1) % self.p
+        
+        return [x3, y3]
+
+    def verify(self, P: list):
+        """Verify if a point P lies on the elliptic curve."""
+        if P == self.e:
+            return True
+        
+        leftSideEquation = pow(P[1], 2, self.p)
+        rightSideEquation = (pow(P[0], 3, self.p) + self.A * P[0] + self.B) % self.p
+
+        if leftSideEquation == rightSideEquation:
+            return True
+        
+        return False
+    
+    def ECDSA_sign(self, m:int, d:int):
+        """ECDSA signing method
+        Args:
+            m: hashed message to be signed (int)
+            d: private key (int)
+        """
+        k = randint(1, self.N - 1)
+        K = self.exp(self.G, k)
+        t = K[0] % self.N
+
+        s = ((m + d*t) * pow(k, -1, self.N)) % self.N
+
+        return (t, s)
+        
+
+    def ECDSA_verif(self, Q:int, m:int, sign: tuple):
+        """ECDSA verification method
+        Args:
+            Q: public key (list[2])
+            m: message (int)
+            sign: signature (tuple)
+        """
+        t, s = sign[0], sign[1]
+        if ( not(t > 0 and t <= (self.N -1)) or not(s > 0 and s <= (self.N -1))):
+            print("Var t or s not in the scope.")
+            return False
+        
+        R1 = self.exp(self.G, m * pow(s, -1, self.N))
+        R2 = self.exp(Q, t * pow(s, -1, self.N))
+
+        R = self.loi(R1, R2)
+
+        if R[0] % self.N == t:
+            return True
+        
+        return False
