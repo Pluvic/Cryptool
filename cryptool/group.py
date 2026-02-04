@@ -10,10 +10,14 @@ class Group(ABC):
     
      Args:
         p (int): A parameter defining the group.
+        N (int, optional): The order of the group. Defaults to None.
+        e (any, optional): The identity element of the group. Defaults to None.
     """
-    def __init__(self, p: int):
+    def __init__(self, p: int, N:int = None, e = None):
         """Initialize the group with parameter p."""
         self.p = p
+        self.N = N
+        self.e = e
     
     @abstractmethod
     def loi(self, g1: int, g2: int) -> int:
